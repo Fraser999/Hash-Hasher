@@ -42,7 +42,10 @@ impl Hasher for HashHasher {
     #[inline]
     fn write(&mut self, msg: &[u8]) {
         let byte_count = cmp::min(8, msg.len());
-        for (index, item) in msg.iter().enumerate().take(byte_count) {
+        // A normal use-case (e.g. by a node in a DHT) may well involve handling hashes which are
+        // identical over the most-significant-bits, hence reverse the input message here to use the
+        // least-significant-bits first.
+        for (index, item) in msg.iter().rev().enumerate().take(byte_count) {
             self.value |= (*item as u64) << (index * 8);
         }
     }
@@ -74,6 +77,7 @@ pub type HashBuildHasher = BuildHasherDefault<HashHasher>;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashMap;
     use std::hash::Hasher;
 
     #[test]
@@ -81,21 +85,21 @@ mod tests {
         let mut hash_hasher = HashHasher::new();
         hash_hasher.write(&[9]);
         assert_eq!(9, hash_hasher.finish());
-        hash_hasher.write(&[0, 4]);
+        hash_hasher.write(&[4, 0]);
         assert_eq!(1033, hash_hasher.finish());
-        hash_hasher.write(&[0, 4, 1]);
+        hash_hasher.write(&[1, 4, 0]);
         assert_eq!(66569, hash_hasher.finish());
 
         hash_hasher = HashHasher::new();
-        hash_hasher.write(&[231, 3]);
+        hash_hasher.write(&[3, 231]);
         assert_eq!(999, hash_hasher.finish());
 
         hash_hasher = HashHasher::new();
-        hash_hasher.write(&[255, 255, 255, 255, 0, 0, 0, 0]);
+        hash_hasher.write(&[0, 0, 0, 0, 255, 255, 255, 255]);
         assert_eq!(4294967295, hash_hasher.finish());
 
         hash_hasher = HashHasher::new();
-        hash_hasher.write(&[1, 255, 255, 255, 255, 255, 255, 255]);
+        hash_hasher.write(&[255, 255, 255, 255, 255, 255, 255, 1]);
         assert_eq!(18446744073709551361, hash_hasher.finish());
 
         hash_hasher = HashHasher::new();
@@ -103,11 +107,24 @@ mod tests {
         assert_eq!(18446744073709551615, hash_hasher.finish());
 
         hash_hasher = HashHasher::new();
-        hash_hasher.write(&[255, 255, 255, 255, 255, 255, 255, 255, 0]);
+        hash_hasher.write(&[0, 255, 255, 255, 255, 255, 255, 255, 255]);
         assert_eq!(18446744073709551615, hash_hasher.finish());
 
         hash_hasher = HashHasher::new();
-        hash_hasher.write(&[255, 255, 255, 255, 255, 255, 255, 255, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+        hash_hasher.write(&[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 255, 255, 255, 255, 255, 255, 255, 255]);
         assert_eq!(18446744073709551615, hash_hasher.finish());
+    }
+
+    #[test]
+    fn hash_map() {
+        let hash_builder = HashBuildHasher::default();
+        let mut map = HashMap::with_hasher(hash_builder);
+        let mut sha1 = [0u8; 20];
+        assert!(map.insert(sha1, "First").is_none());
+        sha1[19] = 1;
+        assert!(map.insert(sha1, "Second").is_none());
+        sha1[0] = 1;
+        assert!(map.insert(sha1, "Third").is_none());
+        assert_eq!(map.insert(sha1, "Fourth"), Some("Third"));
     }
 }
