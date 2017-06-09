@@ -14,4 +14,4 @@ build: false
 
 test_script:
   - cargo test --release
-  - cargo bench --features clippy
+  - cargo bench

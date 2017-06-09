@@ -14,4 +14,4 @@ sudo: false
 cache: cargo
 script:
   - cargo test --release
-  - if [[ $TRAVIS_RUST_VERSION = nightly ]]; then cargo bench --features clippy; fi
+  - if [[ $TRAVIS_RUST_VERSION = nightly ]]; then cargo bench; fi

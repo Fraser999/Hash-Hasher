@@ -1,8 +1,8 @@
-#![deny(missing_docs, trivial_casts, trivial_numeric_casts, unsafe_code, unused_extern_crates,
-        unused_import_braces, unused_qualifications, variant_size_differences, warnings)]
-#![cfg_attr(feature="clippy", feature(plugin))]
-#![cfg_attr(feature="clippy", plugin(clippy))]
-#![cfg_attr(feature="clippy", deny(clippy, clippy_pedantic))]
+#![forbid(warnings)]
+#![warn(missing_copy_implementations, trivial_casts, trivial_numeric_casts, unsafe_code,
+        unused_extern_crates, unused_import_braces, unused_qualifications, unused_results,
+        variant_size_differences)]
+#![cfg_attr(feature="cargo-clippy", deny(clippy, clippy_pedantic))]
 #![feature(test)]
 
 extern crate hash_hasher;
