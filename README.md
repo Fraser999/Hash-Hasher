@@ -1,6 +1,7 @@
 # hash_hasher
 
-A `std::hash::Hasher` which is designed to work with already-hashed or hash-like data.
+A [`std::hash::Hasher`](https://doc.rust-lang.org/std/hash/trait.Hasher.html) which is designed to
+work with already-hashed or hash-like data.
 
 [![Documentation](https://docs.rs/hash_hasher/badge.svg)](https://docs.rs/hash_hasher)
 [![](http://meritbadge.herokuapp.com/hash_hasher)](https://crates.io/crates/hash_hasher)
@@ -14,54 +15,58 @@ for use as a key in a `HashSet` or `HashMap`.
 
 As well as the performance benefit, it also causes `HashSet`s or `HashMap`s to become somewhat
 deterministic.  Given two equal `HashSet`s or `HashMap`s containing more than a single element,
-iterating them will yield the elements in differing orders.  By using a `HashSet<_, HashBuildHasher>`
-or `HashMap<_, _, HashBuildHasher>`, then if the same data is inserted and/or removed *in the same
-order*, iterating the collection will yield a consistent order.
+iterating them will yield the elements in differing orders.  By using a
+[`hash_hasher::HashSet`](https://docs.rs/hash_hasher/*/hash_hasher/type.HashSet.html) or
+[`hash_hasher::HashMap`](https://docs.rs/hash_hasher/*/hash_hasher/type.HashMap.html), then if the
+same data is inserted and/or removed *in the same order*, iterating the collection will yield a
+consistent order.
 
 ## Example
+
+Since `new()` and `with_capacity()` aren't available for `HashSet`s or `HashMap`s using custom
+hashers, the available constructors are `default()`, `with_hasher()` and
+`with_capacity_and_hasher()`.
 
 ```rust
 extern crate hash_hasher;
 
-use std::collections::HashMap;
-use hash_hasher::HashBuildHasher;
+use hash_hasher::{HashBuildHasher, HashMap, HashSet};
 
-let hash_builder = HashBuildHasher::default();
-let mut map: HashMap<u16, &str, HashBuildHasher> = HashMap::with_hasher(hash_builder);
-
+let mut map = HashMap::default();
 assert!(map.insert(0, "zero").is_none());
-assert!(map.insert(1024, "1024").is_none());
-assert_eq!(Some("zero"), map.insert(0, "nothing"));
+
+let mut set = HashSet::with_capacity_and_hasher(100, HashBuildHasher::default());
+assert!(set.insert(0));
 ```
 
 ## Benchmarks
 
-A benchmark suite is included and sample figures can be found at the end of the
+A benchmark suite is included and sample figures can be found at the end of the nightly jobs of the
 [AppVeyor results](https://ci.appveyor.com/project/Fraser999/hash-hasher/branch/master) and the
-nightly jobs of the [Travis results](https://travis-ci.org/Fraser999/Hash-Hasher).
+[Travis results](https://travis-ci.org/Fraser999/Hash-Hasher).
 
 For example:
 
 ```
-insert_sha1s_into_set_using_default_hasher      ... bench:       3,382 ns/iter (+/- 276)
-insert_sha1s_into_set_using_hash_hasher         ... bench:       1,657 ns/iter (+/- 166)
+insert_sha1s_into_set_using_default_hasher      ... bench:       1,171 ns/iter (+/- 30)
+insert_sha1s_into_set_using_hash_hasher         ... bench:         533 ns/iter (+/- 9)
 
-insert_sha256s_into_set_using_default_hasher    ... bench:       4,002 ns/iter (+/- 374)
-insert_sha256s_into_set_using_hash_hasher       ... bench:       1,523 ns/iter (+/- 82)
+insert_sha256s_into_set_using_default_hasher    ... bench:       1,340 ns/iter (+/- 57)
+insert_sha256s_into_set_using_hash_hasher       ... bench:         546 ns/iter (+/- 11)
 
-insert_sha512s_into_set_using_default_hasher    ... bench:       5,128 ns/iter (+/- 228)
-insert_sha512s_into_set_using_hash_hasher       ... bench:       1,859 ns/iter (+/- 109)
+insert_sha512s_into_set_using_default_hasher    ... bench:       1,804 ns/iter (+/- 2,597)
+insert_sha512s_into_set_using_hash_hasher       ... bench:         704 ns/iter (+/- 22)
 
-insert_sip_hashes_into_set_using_default_hasher ... bench:       2,351 ns/iter (+/- 171)
-insert_sip_hashes_into_set_using_hash_hasher    ... bench:         630 ns/iter (+/- 13)
+insert_sip_hashes_into_set_using_default_hasher ... bench:         781 ns/iter (+/- 33)
+insert_sip_hashes_into_set_using_hash_hasher    ... bench:         256 ns/iter (+/- 50)
 ```
 
 ## License
 
 Licensed under either of
 
-* Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-* MIT License ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+* [Apache License, Version 2.0](https://opensource.org/licenses/Apache-2.0) (see also [LICENSE-APACHE](LICENSE-APACHE))
+* [MIT License](https://opensource.org/licenses/MIT) (see also [LICENSE-MIT](LICENSE-MIT))
 
 at your option.
 

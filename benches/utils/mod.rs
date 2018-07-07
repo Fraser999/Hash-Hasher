@@ -4,15 +4,19 @@ pub mod sha512;
 pub mod sip;
 
 use hash_hasher::{HashBuildHasher, HashHasher};
-use rand::{self, Rand};
-use std::collections::HashSet;
+use rand;
+use rand::distributions::{Distribution, Standard};
 use std::collections::hash_map::DefaultHasher;
+use std::collections::HashSet;
 use std::hash::{BuildHasher, Hash, Hasher};
 use test::Bencher;
 
-const COUNT: usize = 100;
+const COUNT: usize = 32;
 
-fn random_data<T: Rand>() -> Vec<T> {
+fn random_data<T>() -> Vec<T>
+where
+    Standard: Distribution<T>,
+{
     let mut data = Vec::<T>::with_capacity(COUNT);
     for _ in 0..COUNT {
         data.push(rand::random());
@@ -20,38 +24,67 @@ fn random_data<T: Rand>() -> Vec<T> {
     data
 }
 
-fn perform_hash<T: Hash + Rand, H: Hasher + Default>(bencher: &mut Bencher) {
+fn perform_hash<T, H>(bencher: &mut Bencher)
+where
+    T: Hash,
+    H: Hasher + Default,
+    Standard: Distribution<T>,
+{
     let data = random_data::<T>();
-    bencher.iter(|| for element in &data {
-                     let mut hasher = H::default();
-                     element.hash(&mut hasher);
-                     let _ = hasher.finish();
-                 });
+    bencher.iter(|| {
+        for element in &data {
+            let mut hasher = H::default();
+            element.hash(&mut hasher);
+            let _ = hasher.finish();
+        }
+    });
 }
 
-fn insert_to_set<T: Copy + Eq + Hash + Rand, S: BuildHasher>(set: &mut HashSet<T, S>,
-                                                             bencher: &mut Bencher) {
+fn insert_to_set<T, S>(set: &mut HashSet<T, S>, bencher: &mut Bencher)
+where
+    T: Copy + Eq + Hash,
+    S: BuildHasher,
+    Standard: Distribution<T>,
+{
     let data = random_data();
-    bencher.iter(|| for element in &data {
-                     let _ = set.insert(*element);
-                 });
+    bencher.iter(|| {
+        for element in &data {
+            let _ = set.insert(*element);
+        }
+    });
     assert!(!set.is_empty());
 }
 
-pub fn hash_using_default_hasher<T: Hash + Rand>(bencher: &mut Bencher) {
+pub fn hash_using_default_hasher<T>(bencher: &mut Bencher)
+where
+    T: Hash,
+    Standard: Distribution<T>,
+{
     perform_hash::<T, DefaultHasher>(bencher);
 }
 
-pub fn hash_using_hash_hasher<T: Hash + Rand>(bencher: &mut Bencher) {
+pub fn hash_using_hash_hasher<T>(bencher: &mut Bencher)
+where
+    T: Hash,
+    Standard: Distribution<T>,
+{
     perform_hash::<T, HashHasher>(bencher);
 }
 
-pub fn set_using_default_hasher<T: Copy + Eq + Hash + Rand>(bencher: &mut Bencher) {
+pub fn set_using_default_hasher<T>(bencher: &mut Bencher)
+where
+    T: Copy + Eq + Hash,
+    Standard: Distribution<T>,
+{
     let mut set = HashSet::<T>::with_capacity(COUNT);
     insert_to_set(&mut set, bencher);
 }
 
-pub fn set_using_hash_hasher<T: Copy + Eq + Hash + Rand>(bencher: &mut Bencher) {
+pub fn set_using_hash_hasher<T>(bencher: &mut Bencher)
+where
+    T: Copy + Eq + Hash,
+    Standard: Distribution<T>,
+{
     let hash_builder = HashBuildHasher::default();
     let mut set = HashSet::<T, HashBuildHasher>::with_capacity_and_hasher(COUNT, hash_builder);
     insert_to_set(&mut set, bencher);

@@ -1,4 +1,5 @@
-//! A `std::hash::Hasher` which is designed to work with already-hashed or hash-like data.
+//! A [`std::hash::Hasher`](https://doc.rust-lang.org/std/hash/trait.Hasher.html) which is designed
+//! to work with already-hashed or hash-like data.
 //!
 //! The provided hasher does minimal work under the assumption that the input data is already
 //! suitable for use as a key in a `HashSet` or `HashMap`.
@@ -6,40 +7,53 @@
 //! As well as the performance benefit, it also causes `HashSet`s or `HashMap`s to become somewhat
 //! deterministic.  Given two equal `HashSet`s or `HashMap`s containing more than a single element,
 //! iterating them will yield the elements in differing orders.  By using a
-//! `HashSet<_, HashBuildHasher>` or `HashMap<_, _, HashBuildHasher>`, then if the same data is
-//! inserted and/or removed *in the same order*, iterating the collection will yield a consistent
-//! order.
+//! [`hash_hasher::HashSet`](type.HashSet.html) or [`hash_hasher::HashMap`](type.HashMap.html), then
+//! if the same data is inserted and/or removed *in the same order*, iterating the collection will
+//! yield a consistent order.
 //!
 //! # Examples
 //!
+//! Since `new()` and `with_capacity()` aren't available for `HashSet`s or `HashMap`s using custom
+//! hashers, the available constructors are `default()`, `with_hasher()` and
+//! `with_capacity_and_hasher()`.
+//!
+//! ## Using `default()`
+//!
 //! ```
-//! use std::collections::HashMap;
-//! use hash_hasher::HashBuildHasher;
+//! use hash_hasher::HashMap;
 //!
-//! let hash_builder = HashBuildHasher::default();
-//! let mut map: HashMap<u16, &str, HashBuildHasher> = HashMap::with_hasher(hash_builder);
-//!
+//! let mut map = HashMap::default();
 //! assert!(map.insert(0, "zero").is_none());
-//! assert!(map.insert(1024, "1024").is_none());
-//! assert_eq!(Some("zero"), map.insert(0, "nothing"));
+//! ```
+//!
+//! ## Using `with_capacity_and_hasher()`
+//!
+//! ```
+//! use hash_hasher::{HashBuildHasher, HashSet};
+//!
+//! let mut set = HashSet::with_capacity_and_hasher(100, HashBuildHasher::default());
+//! assert!(set.insert(0));
 //! ```
 
 #![forbid(warnings)]
-#![warn(missing_copy_implementations, trivial_casts, trivial_numeric_casts, unsafe_code,
-        unused_extern_crates, unused_import_braces, unused_qualifications, unused_results,
-        variant_size_differences)]
-#![cfg_attr(feature="cargo-clippy", deny(clippy, clippy_pedantic))]
+#![warn(
+    missing_copy_implementations, trivial_casts, trivial_numeric_casts, unsafe_code,
+    unused_extern_crates, unused_import_braces, unused_qualifications, unused_results,
+    variant_size_differences
+)]
+#![cfg_attr(feature = "cargo-clippy", deny(clippy, clippy_pedantic))]
+#![doc(test(attr(forbid(warnings))))]
+
+#[cfg(test)]
+extern crate rand;
 
 use std::hash::{BuildHasherDefault, Hasher};
 
 /// A hasher which does minimal work to create the required `u64` output under the assumption that
 /// the input is already a hash digest or otherwise already suitable for use as a key in a `HashSet`
 /// or `HashMap`.
-#[derive(Copy, Clone)]
-pub struct HashHasher {
-    /// Holds internal state of hasher.
-    value: u64,
-}
+#[derive(Copy, Clone, Default)]
+pub struct HashHasher(u64);
 
 impl Hasher for HashHasher {
     #[inline]
@@ -48,31 +62,29 @@ impl Hasher for HashHasher {
         // identical over the most-significant-bits, hence reverse the input message here to use the
         // least-significant-bits first.
         for (index, item) in msg.iter().rev().enumerate().take(8) {
-            self.value |= (*item as u64) << (index * 8);
+            self.0 |= u64::from(*item) << (index * 8);
         }
     }
 
     #[inline]
-    fn finish(&self) -> u64 { self.value }
-}
-
-impl Default for HashHasher {
-    #[inline]
-    fn default() -> HashHasher { HashHasher { value: 0 } }
+    fn finish(&self) -> u64 {
+        self.0
+    }
 }
 
 /// Alias for a `BuildHasherDefault<HashHasher>`.
 pub type HashBuildHasher = BuildHasherDefault<HashHasher>;
 
+/// Alias for a `std::collections::HashMap<K, V, HashBuildHasher>`.
+pub type HashMap<K, V> = ::std::collections::HashMap<K, V, HashBuildHasher>;
 
+/// Alias for a `std::collections::HashSet<K, HashBuildHasher>`.
+pub type HashSet<K> = ::std::collections::HashSet<K, HashBuildHasher>;
 
 #[cfg(test)]
 mod tests {
-    extern crate rand;
-
-    use self::rand::{Rng, thread_rng};
     use super::*;
-    use std::collections::{HashMap, HashSet};
+    use rand::{thread_rng, Rng};
     use std::hash::Hasher;
 
     #[test]
@@ -91,29 +103,30 @@ mod tests {
 
         hash_hasher = HashHasher::default();
         hash_hasher.write(&[0, 0, 0, 0, 255, 255, 255, 255]);
-        assert_eq!(4294967295, hash_hasher.finish());
+        assert_eq!(4_294_967_295, hash_hasher.finish());
 
         hash_hasher = HashHasher::default();
         hash_hasher.write(&[255, 255, 255, 255, 255, 255, 255, 1]);
-        assert_eq!(18446744073709551361, hash_hasher.finish());
+        assert_eq!(18_446_744_073_709_551_361, hash_hasher.finish());
 
         hash_hasher = HashHasher::default();
         hash_hasher.write(&[255, 255, 255, 255, 255, 255, 255, 255]);
-        assert_eq!(18446744073709551615, hash_hasher.finish());
+        assert_eq!(18_446_744_073_709_551_615, hash_hasher.finish());
 
         hash_hasher = HashHasher::default();
         hash_hasher.write(&[0, 255, 255, 255, 255, 255, 255, 255, 255]);
-        assert_eq!(18446744073709551615, hash_hasher.finish());
+        assert_eq!(18_446_744_073_709_551_615, hash_hasher.finish());
 
         hash_hasher = HashHasher::default();
-        hash_hasher.write(&[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 255, 255, 255, 255, 255, 255, 255, 255]);
-        assert_eq!(18446744073709551615, hash_hasher.finish());
+        hash_hasher.write(&[
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 255, 255, 255, 255, 255, 255, 255, 255,
+        ]);
+        assert_eq!(18_446_744_073_709_551_615, hash_hasher.finish());
     }
 
     #[test]
     fn hash_map() {
-        let hash_builder = HashBuildHasher::default();
-        let mut map = HashMap::with_hasher(hash_builder);
+        let mut map = HashMap::with_capacity_and_hasher(3, HashBuildHasher::default());
         let mut sha1 = [0_u8; 20];
         assert!(map.insert(sha1, "First").is_none());
         sha1[19] = 1;
@@ -125,22 +138,28 @@ mod tests {
 
     #[test]
     fn determinism() {
-        let mut set1 = HashSet::with_hasher(HashBuildHasher::default());
-        let mut set2 = HashSet::with_hasher(HashBuildHasher::default());
+        let mut set1 = HashSet::<u64>::default();
+        let mut set2 = HashSet::default();
 
-        let mut set3 = HashSet::new();
-        let mut set4 = HashSet::new();
+        let mut set3 = ::std::collections::HashSet::new();
+        let mut set4 = ::std::collections::HashSet::new();
 
-        let mut generator = thread_rng();
+        let mut rng = thread_rng();
         for _ in 0..100 {
-            let random_value = generator.next_u64();
+            let random_value = rng.gen();
             let _ = set1.insert(random_value);
             let _ = set2.insert(random_value);
             let _ = set3.insert(random_value);
             let _ = set4.insert(random_value);
         }
 
-        assert_eq!(set1.into_iter().collect::<Vec<_>>(), set2.into_iter().collect::<Vec<_>>());
-        assert_ne!(set3.into_iter().collect::<Vec<_>>(), set4.into_iter().collect::<Vec<_>>());
+        assert_eq!(
+            set1.into_iter().collect::<Vec<_>>(),
+            set2.into_iter().collect::<Vec<_>>()
+        );
+        assert_ne!(
+            set3.into_iter().collect::<Vec<_>>(),
+            set4.into_iter().collect::<Vec<_>>()
+        );
     }
 }

@@ -1,25 +1,13 @@
-use rand::{Rand, Rng};
-use std::hash::{Hash, Hasher};
+use rand::distributions::{Distribution, Standard};
+use rand::Rng;
 
 const DIGEST_SIZE: usize = 20;
 
-#[derive(Copy, Clone, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Digest(pub [u8; DIGEST_SIZE]);
 
-impl PartialEq for Digest {
-    fn eq(&self, other: &Digest) -> bool { self.0[..] == other.0[..] }
-}
-
-impl Hash for Digest {
-    fn hash<H: Hasher>(&self, state: &mut H) { state.write(&self.0[..]) }
-}
-
-impl Rand for Digest {
-    fn rand<R: Rng>(rng: &mut R) -> Digest {
-        let mut digest = [0_u8; DIGEST_SIZE];
-        for c in digest[..].iter_mut() {
-            *c = rng.gen();
-        }
-        Digest(digest)
+impl Distribution<Digest> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Digest {
+        Digest(rng.gen())
     }
 }

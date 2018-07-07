@@ -1,27 +1,41 @@
-use rand::{Rand, Rng};
+use rand::distributions::{Distribution, Standard};
+use rand::Rng;
+use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 
 const DIGEST_SIZE: usize = 64;
 
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct Digest(pub [u8; DIGEST_SIZE]);
 
-impl Clone for Digest {
-    fn clone(&self) -> Self { *self }
-}
-
 impl PartialEq for Digest {
-    fn eq(&self, other: &Digest) -> bool { self.0[..] == other.0[..] }
+    fn eq(&self, other: &Self) -> bool {
+        self.0[..] == other.0[..]
+    }
 }
 
 impl Eq for Digest {}
 
-impl Hash for Digest {
-    fn hash<H: Hasher>(&self, state: &mut H) { state.write(&self.0[..]) }
+impl PartialOrd for Digest {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
-impl Rand for Digest {
-    fn rand<R: Rng>(rng: &mut R) -> Digest {
+impl Ord for Digest {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.0[..].cmp(&other.0[..])
+    }
+}
+
+impl Hash for Digest {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        state.write(&self.0[..])
+    }
+}
+
+impl Distribution<Digest> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Digest {
         let mut digest = [0_u8; DIGEST_SIZE];
         for c in digest[..].iter_mut() {
             *c = rng.gen();

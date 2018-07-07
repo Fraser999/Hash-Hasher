@@ -2,13 +2,12 @@
 authors = ["Fraser Hutchison <fraser.hutchison@maidsafe.net>"]
 categories = ["data-structures"]
 description = "A hasher which is designed to work with already-hashed or hash-like data."
-documentation = "https://docs.rs/hash_hasher"
 keywords = ["hashmap", "hashset", "hasher", "hash", ]
-license = "MIT/Apache-2.0"
+license = "Apache-2.0 OR MIT"
 name = "hash_hasher"
 readme = "README.md"
 repository = "https://github.com/Fraser999/Hash-Hasher.git"
-version = "0.3.0"
+version = "1.0.0"
 
 [dev-dependencies]
-rand = "0.3"
+rand = "0.5"
