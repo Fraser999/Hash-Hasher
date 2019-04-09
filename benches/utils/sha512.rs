@@ -1,7 +1,11 @@
-use rand::distributions::{Distribution, Standard};
-use rand::Rng;
-use std::cmp::Ordering;
-use std::hash::{Hash, Hasher};
+use rand::{
+    distributions::{Distribution, Standard},
+    Rng,
+};
+use std::{
+    cmp::Ordering,
+    hash::{Hash, Hasher},
+};
 
 const DIGEST_SIZE: usize = 64;
 

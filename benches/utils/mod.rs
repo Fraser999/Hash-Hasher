@@ -3,12 +3,16 @@ pub mod sha256;
 pub mod sha512;
 pub mod sip;
 
+use fnv::{FnvBuildHasher, FnvHasher};
 use hash_hasher::{HashBuildHasher, HashHasher};
-use rand;
-use rand::distributions::{Distribution, Standard};
-use std::collections::hash_map::DefaultHasher;
-use std::collections::HashSet;
-use std::hash::{BuildHasher, Hash, Hasher};
+use rand::{
+    self,
+    distributions::{Distribution, Standard},
+};
+use std::{
+    collections::{hash_map::DefaultHasher, HashSet},
+    hash::{BuildHasher, Hash, Hasher},
+};
 use test::Bencher;
 
 const COUNT: usize = 32;
@@ -71,6 +75,14 @@ where
     perform_hash::<T, HashHasher>(bencher);
 }
 
+pub fn hash_using_fnv_hasher<T>(bencher: &mut Bencher)
+where
+    T: Hash,
+    Standard: Distribution<T>,
+{
+    perform_hash::<T, FnvHasher>(bencher);
+}
+
 pub fn set_using_default_hasher<T>(bencher: &mut Bencher)
 where
     T: Copy + Eq + Hash,
@@ -87,5 +99,15 @@ where
 {
     let hash_builder = HashBuildHasher::default();
     let mut set = HashSet::<T, HashBuildHasher>::with_capacity_and_hasher(COUNT, hash_builder);
+    insert_to_set(&mut set, bencher);
+}
+
+pub fn set_using_fnv_hasher<T>(bencher: &mut Bencher)
+where
+    T: Copy + Eq + Hash,
+    Standard: Distribution<T>,
+{
+    let hash_builder = FnvBuildHasher::default();
+    let mut set = HashSet::<T, FnvBuildHasher>::with_capacity_and_hasher(COUNT, hash_builder);
     insert_to_set(&mut set, bencher);
 }

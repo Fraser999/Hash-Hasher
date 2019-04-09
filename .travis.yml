@@ -19,14 +19,15 @@ cache:
   cargo: true
 
 before_script:
-  - if [[ $TRAVIS_RUST_VERSION = nightly && $TRAVIS_OS_NAME == linux ]]; then cargo install clippy -f; fi
+  - if [[ $TRAVIS_RUST_VERSION = stable && $TRAVIS_OS_NAME == linux ]]; then rustup component add clippy; fi
 
 script:
   - cargo test --release
-  - if [[ $TRAVIS_RUST_VERSION = nightly && $TRAVIS_OS_NAME == linux ]]; then
+  - if [[ $TRAVIS_RUST_VERSION = stable && $TRAVIS_OS_NAME == linux ]]; then
       (
         set -x;
-        cargo clippy --all-targets
+        cargo clippy &&
+        cargo clippy --profile=test
       );
     fi
   - if [[ $TRAVIS_RUST_VERSION = nightly ]]; then

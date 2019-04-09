@@ -1,5 +1,7 @@
-use rand::distributions::{Distribution, Standard};
-use rand::Rng;
+use rand::{
+    distributions::{Distribution, Standard},
+    Rng,
+};
 
 const DIGEST_SIZE: usize = 20;
 
