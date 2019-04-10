@@ -16,9 +16,9 @@ for use as a key in a `HashSet` or `HashMap`.
 As well as the performance benefit, it also causes `HashSet`s or `HashMap`s to become somewhat
 deterministic.  Given two equal `HashSet`s or `HashMap`s containing more than a single element,
 iterating them will yield the elements in differing orders.  By using a
-[`hash_hasher::HashSet`](https://docs.rs/hash_hasher/*/hash_hasher/type.HashSet.html) or
-[`hash_hasher::HashMap`](https://docs.rs/hash_hasher/*/hash_hasher/type.HashMap.html), then if the
-same data is inserted and/or removed *in the same order*, iterating the collection will yield a
+[`hash_hasher::HashedSet`](https://docs.rs/hash_hasher/*/hash_hasher/type.HashedSet.html) or
+[`hash_hasher::HashedMap`](https://docs.rs/hash_hasher/*/hash_hasher/type.HashedMap.html), then if
+the same data is inserted and/or removed *in the same order*, iterating the collection will yield a
 consistent order.
 
 ## Example
@@ -30,12 +30,12 @@ hashers, the available constructors are `default()`, `with_hasher()` and
 ```rust
 extern crate hash_hasher;
 
-use hash_hasher::{HashBuildHasher, HashMap, HashSet};
+use hash_hasher::{HashBuildHasher, HashedMap, HashedSet};
 
-let mut map = HashMap::default();
+let mut map = HashedMap::default();
 assert!(map.insert(0, "zero").is_none());
 
-let mut set = HashSet::with_capacity_and_hasher(100, HashBuildHasher::default());
+let mut set = HashedSet::with_capacity_and_hasher(100, HashBuildHasher::default());
 assert!(set.insert(0));
 ```
 

@@ -20,18 +20,18 @@
 //! ## Using `default()`
 //!
 //! ```
-//! use hash_hasher::HashMap;
+//! use hash_hasher::HashedMap;
 //!
-//! let mut map = HashMap::default();
+//! let mut map = HashedMap::default();
 //! assert!(map.insert(0, "zero").is_none());
 //! ```
 //!
 //! ## Using `with_capacity_and_hasher()`
 //!
 //! ```
-//! use hash_hasher::{HashBuildHasher, HashSet};
+//! use hash_hasher::{HashBuildHasher, HashedSet};
 //!
-//! let mut set = HashSet::with_capacity_and_hasher(100, HashBuildHasher::default());
+//! let mut set = HashedSet::with_capacity_and_hasher(100, HashBuildHasher::default());
 //! assert!(set.insert(0));
 //! ```
 
@@ -83,10 +83,10 @@ impl Hasher for HashHasher {
 pub type HashBuildHasher = BuildHasherDefault<HashHasher>;
 
 /// Alias for a `std::collections::HashMap<K, V, HashBuildHasher>`.
-pub type HashMap<K, V> = ::std::collections::HashMap<K, V, HashBuildHasher>;
+pub type HashedMap<K, V> = ::std::collections::HashMap<K, V, HashBuildHasher>;
 
 /// Alias for a `std::collections::HashSet<K, HashBuildHasher>`.
-pub type HashSet<K> = ::std::collections::HashSet<K, HashBuildHasher>;
+pub type HashedSet<K> = ::std::collections::HashSet<K, HashBuildHasher>;
 
 #[cfg(test)]
 mod tests {
@@ -133,7 +133,7 @@ mod tests {
 
     #[test]
     fn hash_map() {
-        let mut map = HashMap::with_capacity_and_hasher(3, HashBuildHasher::default());
+        let mut map = HashedMap::with_capacity_and_hasher(3, HashBuildHasher::default());
         let mut sha1 = [0_u8; 20];
         assert!(map.insert(sha1, "First").is_none());
         sha1[19] = 1;
@@ -145,8 +145,8 @@ mod tests {
 
     #[test]
     fn determinism() {
-        let mut set1 = HashSet::<u64>::default();
-        let mut set2 = HashSet::default();
+        let mut set1 = HashedSet::<u64>::default();
+        let mut set2 = HashedSet::default();
 
         let mut set3 = ::std::collections::HashSet::new();
         let mut set4 = ::std::collections::HashSet::new();
