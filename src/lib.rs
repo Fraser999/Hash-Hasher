@@ -35,24 +35,47 @@
 //! assert!(set.insert(0));
 //! ```
 
-#![forbid(warnings)]
-#![warn(
-    missing_copy_implementations,
+#![doc(test(attr(forbid(warnings))))]
+#![warn(unused, missing_copy_implementations, missing_docs)]
+#![deny(
+    deprecated_in_future,
+    future_incompatible,
+    macro_use_extern_crate,
+    rust_2018_idioms,
+    nonstandard_style,
+    single_use_lifetimes,
     trivial_casts,
     trivial_numeric_casts,
+    unreachable_pub,
     unsafe_code,
-    unused_extern_crates,
+    unstable_features,
     unused_import_braces,
+    unused_lifetimes,
     unused_qualifications,
     unused_results,
-    variant_size_differences,
+    warnings,
     clippy::all,
     clippy::pedantic
 )]
-#![doc(test(attr(forbid(warnings))))]
-
-#[cfg(test)]
-extern crate rand;
+#![forbid(
+    const_err,
+    duplicate_macro_exports,
+    exceeding_bitshifts,
+    incoherent_fundamental_impls,
+    invalid_type_param_default,
+    legacy_constructor_visibility,
+    legacy_directory_ownership,
+    macro_expanded_macro_exports_accessed_by_absolute_paths,
+    missing_fragment_specifier,
+    mutable_transmutes,
+    no_mangle_const_items,
+    order_dependent_trait_objects,
+    overflowing_literals,
+    parenthesized_params_in_types_and_modules,
+    pub_use_of_private_extern_crate,
+    safe_extern_statics,
+    unknown_crate_types
+)]
 
 use std::hash::{BuildHasherDefault, Hasher};
 
