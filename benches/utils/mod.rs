@@ -3,6 +3,7 @@ pub mod sha256;
 pub mod sha512;
 pub mod sip;
 
+use criterion::Bencher;
 use fnv::{FnvBuildHasher, FnvHasher};
 use hash_hasher::{HashBuildHasher, HashHasher};
 use rand::{
@@ -13,7 +14,6 @@ use std::{
     collections::{hash_map::DefaultHasher, HashSet},
     hash::{BuildHasher, Hash, Hasher},
 };
-use test::Bencher;
 
 const COUNT: usize = 32;
 
