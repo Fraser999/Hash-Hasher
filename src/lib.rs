@@ -87,12 +87,12 @@ pub struct HashHasher(u64);
 
 impl Hasher for HashHasher {
     #[inline]
-    fn write(&mut self, msg: &[u8]) {
+    fn write(&mut self, value: &[u8]) {
         // A normal use-case (e.g. by a node in a DHT) may well involve handling hashes which are
         // identical over the most-significant-bits, hence reverse the input message here to use the
         // least-significant-bits first.
-        for (index, item) in msg.iter().rev().enumerate().take(8) {
-            self.0 |= u64::from(*item) << (index * 8);
+        for (index, item) in value.iter().rev().enumerate().take(8) {
+            self.0 ^= u64::from(*item) << (index * 8);
         }
     }
 
@@ -115,7 +115,7 @@ pub type HashedSet<K> = ::std::collections::HashSet<K, HashBuildHasher>;
 mod tests {
     use super::*;
     use rand::{thread_rng, Rng};
-    use std::hash::Hasher;
+    use std::hash::{Hash, Hasher};
 
     #[test]
     fn hasher() {
@@ -125,7 +125,7 @@ mod tests {
         hash_hasher.write(&[4, 0]);
         assert_eq!(1033, hash_hasher.finish());
         hash_hasher.write(&[1, 4, 0]);
-        assert_eq!(66569, hash_hasher.finish());
+        assert_eq!(65545, hash_hasher.finish());
 
         hash_hasher = HashHasher::default();
         hash_hasher.write(&[3, 231]);
@@ -191,5 +191,30 @@ mod tests {
             set3.into_iter().collect::<Vec<_>>(),
             set4.into_iter().collect::<Vec<_>>()
         );
+    }
+
+    fn hash<H: Hash>(value: H) -> u64 {
+        let mut hasher = HashHasher::default();
+        value.hash(&mut hasher);
+        hasher.finish()
+    }
+
+    #[test]
+    // This checks for regressions to https://github.com/Fraser999/Hash-Hasher/issues/1
+    fn avoid_tending_towards_max_value() {
+        let h1 = hash(&[u64::max_value()]);
+        assert_ne!(u64::max_value(), h1);
+
+        let h2 = hash(&[u64::max_value(), u64::max_value()]);
+        assert_ne!(u64::max_value(), h2);
+        assert_ne!(h1, h2, "\nh1: {:b}\nh2: {:b}\n", h1, h2);
+
+        let h3 = hash(&[
+            [u64::max_value(), u64::max_value()],
+            [u64::max_value(), u64::max_value()],
+        ]);
+        assert_ne!(u64::max_value(), h3);
+        assert_ne!(h1, h3, "\nh1: {:b}\nh3: {:b}\n", h1, h3);
+        assert_ne!(h2, h3, "\nh2: {:b}\nh3: {:b}\n", h2, h3);
     }
 }
