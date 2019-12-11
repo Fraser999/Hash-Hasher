@@ -21,7 +21,6 @@
     const_err,
     duplicate_macro_exports,
     exceeding_bitshifts,
-    incoherent_fundamental_impls,
     invalid_type_param_default,
     legacy_constructor_visibility,
     legacy_directory_ownership,

@@ -5,7 +5,7 @@ work with already-hashed or hash-like data.
 
 [![Documentation](https://docs.rs/hash_hasher/badge.svg)](https://docs.rs/hash_hasher)
 [![](http://meritbadge.herokuapp.com/hash_hasher)](https://crates.io/crates/hash_hasher)
-[![Build status](https://ci.appveyor.com/api/projects/status/qnh6484hh5hlsh8a/branch/master?svg=true)](https://ci.appveyor.com/project/Fraser999/hash-hasher/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/cw65dk301auysvom/branch/master?svg=true)](https://ci.appveyor.com/project/Fraser999/hash-hasher/branch/master)
 [![Build Status](https://travis-ci.org/Fraser999/Hash-Hasher.svg?branch=master)](https://travis-ci.org/Fraser999/Hash-Hasher)
 
 ## Details

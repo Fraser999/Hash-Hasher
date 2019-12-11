@@ -7,9 +7,9 @@
 //! As well as the performance benefit, it also causes `HashSet`s or `HashMap`s to become somewhat
 //! deterministic.  Given two equal `HashSet`s or `HashMap`s containing more than a single element,
 //! iterating them will yield the elements in differing orders.  By using a
-//! [`hash_hasher::HashSet`](type.HashSet.html) or [`hash_hasher::HashMap`](type.HashMap.html), then
-//! if the same data is inserted and/or removed *in the same order*, iterating the collection will
-//! yield a consistent order.
+//! [`hash_hasher::HashedSet`](type.HashedSet.html) or
+//! [`hash_hasher::HashedMap`](type.HashedMap.html), then if the same data is inserted and/or
+//! removed *in the same order*, iterating the collection will yield a consistent order.
 //!
 //! # Examples
 //!
@@ -61,7 +61,6 @@
     const_err,
     duplicate_macro_exports,
     exceeding_bitshifts,
-    incoherent_fundamental_impls,
     invalid_type_param_default,
     legacy_constructor_visibility,
     legacy_directory_ownership,
