@@ -19,20 +19,15 @@
 )]
 #![forbid(
     const_err,
-    duplicate_macro_exports,
     exceeding_bitshifts,
     invalid_type_param_default,
-    legacy_constructor_visibility,
-    legacy_directory_ownership,
     macro_expanded_macro_exports_accessed_by_absolute_paths,
     missing_fragment_specifier,
     mutable_transmutes,
     no_mangle_const_items,
     order_dependent_trait_objects,
     overflowing_literals,
-    parenthesized_params_in_types_and_modules,
     pub_use_of_private_extern_crate,
-    safe_extern_statics,
     unknown_crate_types
 )]
 #![feature(test)]
