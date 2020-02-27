@@ -58,8 +58,8 @@
     clippy::pedantic
 )]
 #![forbid(
+    arithmetic_overflow,
     const_err,
-    exceeding_bitshifts,
     invalid_type_param_default,
     macro_expanded_macro_exports_accessed_by_absolute_paths,
     missing_fragment_specifier,
