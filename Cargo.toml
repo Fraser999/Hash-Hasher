@@ -11,5 +11,5 @@ repository = "https://github.com/Fraser999/Hash-Hasher.git"
 version = "2.0.2"
 
 [dev-dependencies]
-rand = "0.7"
-fnv = "1"
+rand = "0.7.3"
+fnv = "1.0.6"
