@@ -8,7 +8,7 @@ license = "Apache-2.0 OR MIT"
 name = "hash_hasher"
 readme = "README.md"
 repository = "https://github.com/Fraser999/Hash-Hasher.git"
-version = "2.0.2"
+version = "2.0.3"
 
 [dev-dependencies]
 rand = "0.7"

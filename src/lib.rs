@@ -59,7 +59,6 @@
 )]
 #![forbid(
     const_err,
-    exceeding_bitshifts,
     invalid_type_param_default,
     macro_expanded_macro_exports_accessed_by_absolute_paths,
     missing_fragment_specifier,
@@ -107,7 +106,7 @@ pub type HashedSet<K> = ::std::collections::HashSet<K, HashBuildHasher>;
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{HashBuildHasher, HashHasher, HashedMap, HashedSet};
     use rand::{thread_rng, Rng};
     use std::hash::{Hash, Hasher};
 
