@@ -1,15 +1,13 @@
-//! A [`std::hash::Hasher`](https://doc.rust-lang.org/std/hash/trait.Hasher.html) which is designed
-//! to work with already-hashed or hash-like data.
+//! A [`std::hash::Hasher`] which is designed to work with already-hashed or hash-like data.
 //!
 //! The provided hasher does minimal work under the assumption that the input data is already
 //! suitable for use as a key in a `HashSet` or `HashMap`.
 //!
 //! As well as the performance benefit, it also causes `HashSet`s or `HashMap`s to become somewhat
 //! deterministic.  Given two equal `HashSet`s or `HashMap`s containing more than a single element,
-//! iterating them will yield the elements in differing orders.  By using a
-//! [`hash_hasher::HashedSet`](type.HashedSet.html) or
-//! [`hash_hasher::HashedMap`](type.HashedMap.html), then if the same data is inserted and/or
-//! removed *in the same order*, iterating the collection will yield a consistent order.
+//! iterating them will likely yield the elements in differing orders.  By using a
+//! [`HashedSet`] or [`HashedMap`], then if the same data is inserted and/or removed *in the same
+//! order*, iterating the collection will yield a consistent order.
 //!
 //! # Examples
 //!
@@ -36,38 +34,17 @@
 //! ```
 
 #![doc(test(attr(forbid(warnings))))]
-#![warn(unused, missing_copy_implementations, missing_docs)]
 #![deny(
-    deprecated_in_future,
-    future_incompatible,
-    macro_use_extern_crate,
-    rust_2018_idioms,
-    nonstandard_style,
-    single_use_lifetimes,
-    trivial_casts,
-    trivial_numeric_casts,
+    missing_docs,
     unreachable_pub,
     unsafe_code,
-    unstable_features,
-    unused_import_braces,
+    unused,
     unused_lifetimes,
     unused_qualifications,
     unused_results,
+    variant_size_differences,
     warnings,
-    clippy::all,
-    clippy::pedantic
-)]
-#![forbid(
-    const_err,
-    invalid_type_param_default,
-    macro_expanded_macro_exports_accessed_by_absolute_paths,
-    missing_fragment_specifier,
-    mutable_transmutes,
-    no_mangle_const_items,
-    order_dependent_trait_objects,
-    overflowing_literals,
-    pub_use_of_private_extern_crate,
-    unknown_crate_types
+    clippy::all
 )]
 
 use std::hash::{BuildHasherDefault, Hasher};
@@ -99,15 +76,15 @@ impl Hasher for HashHasher {
 pub type HashBuildHasher = BuildHasherDefault<HashHasher>;
 
 /// Alias for a `std::collections::HashMap<K, V, HashBuildHasher>`.
-pub type HashedMap<K, V> = ::std::collections::HashMap<K, V, HashBuildHasher>;
+pub type HashedMap<K, V> = std::collections::HashMap<K, V, HashBuildHasher>;
 
 /// Alias for a `std::collections::HashSet<K, HashBuildHasher>`.
-pub type HashedSet<K> = ::std::collections::HashSet<K, HashBuildHasher>;
+pub type HashedSet<K> = std::collections::HashSet<K, HashBuildHasher>;
 
 #[cfg(test)]
 mod tests {
     use super::{HashBuildHasher, HashHasher, HashedMap, HashedSet};
-    use rand::{thread_rng, Rng};
+    use rand::Rng as _;
     use std::hash::{Hash, Hasher};
 
     #[test]
@@ -164,12 +141,12 @@ mod tests {
         let mut set1 = HashedSet::<u64>::default();
         let mut set2 = HashedSet::default();
 
-        let mut set3 = ::std::collections::HashSet::new();
-        let mut set4 = ::std::collections::HashSet::new();
+        let mut set3 = std::collections::HashSet::new();
+        let mut set4 = std::collections::HashSet::new();
 
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
         for _ in 0..100 {
-            let random_value = rng.gen();
+            let random_value = rng.random();
             let _ = set1.insert(random_value);
             let _ = set2.insert(random_value);
             let _ = set3.insert(random_value);
@@ -195,19 +172,16 @@ mod tests {
     #[test]
     // This checks for regressions to https://github.com/Fraser999/Hash-Hasher/issues/1
     fn avoid_tending_towards_max_value() {
-        let h1 = hash(&[u64::max_value()]);
-        assert_ne!(u64::max_value(), h1);
+        let h1 = hash([u64::MAX]);
+        assert_ne!(u64::MAX, h1);
 
-        let h2 = hash(&[u64::max_value(), u64::max_value()]);
-        assert_ne!(u64::max_value(), h2);
-        assert_ne!(h1, h2, "\nh1: {:b}\nh2: {:b}\n", h1, h2);
+        let h2 = hash([u64::MAX, u64::MAX]);
+        assert_ne!(u64::MAX, h2);
+        assert_ne!(h1, h2, "\nh1: {h1:b}\nh2: {h2:b}\n");
 
-        let h3 = hash(&[
-            [u64::max_value(), u64::max_value()],
-            [u64::max_value(), u64::max_value()],
-        ]);
-        assert_ne!(u64::max_value(), h3);
-        assert_ne!(h1, h3, "\nh1: {:b}\nh3: {:b}\n", h1, h3);
-        assert_ne!(h2, h3, "\nh2: {:b}\nh3: {:b}\n", h2, h3);
+        let h3 = hash([[u64::MAX, u64::MAX], [u64::MAX, u64::MAX]]);
+        assert_ne!(u64::MAX, h3);
+        assert_ne!(h1, h3, "\nh1: {h1:b}\nh3: {h3:b}\n");
+        assert_ne!(h2, h3, "\nh2: {h2:b}\nh3: {h3:b}\n");
     }
 }

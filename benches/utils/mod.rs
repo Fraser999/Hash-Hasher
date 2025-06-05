@@ -7,7 +7,7 @@ use fnv::{FnvBuildHasher, FnvHasher};
 use hash_hasher::{HashBuildHasher, HashHasher};
 use rand::{
     self,
-    distributions::{Distribution, Standard},
+    distr::{Distribution, StandardUniform},
 };
 use std::{
     collections::{hash_map::DefaultHasher, HashSet},
@@ -19,7 +19,7 @@ const COUNT: usize = 32;
 
 fn random_data<T>() -> Vec<T>
 where
-    Standard: Distribution<T>,
+    StandardUniform: Distribution<T>,
 {
     let mut data = Vec::<T>::with_capacity(COUNT);
     for _ in 0..COUNT {
@@ -32,7 +32,7 @@ fn perform_hash<T, H>(bencher: &mut Bencher)
 where
     T: Hash,
     H: Hasher + Default,
-    Standard: Distribution<T>,
+    StandardUniform: Distribution<T>,
 {
     let data = random_data::<T>();
     bencher.iter(|| {
@@ -48,7 +48,7 @@ fn insert_to_set<T, S>(set: &mut HashSet<T, S>, bencher: &mut Bencher)
 where
     T: Copy + Eq + Hash,
     S: BuildHasher,
-    Standard: Distribution<T>,
+    StandardUniform: Distribution<T>,
 {
     let data = random_data();
     bencher.iter(|| {
@@ -62,7 +62,7 @@ where
 pub fn hash_using_default_hasher<T>(bencher: &mut Bencher)
 where
     T: Hash,
-    Standard: Distribution<T>,
+    StandardUniform: Distribution<T>,
 {
     perform_hash::<T, DefaultHasher>(bencher);
 }
@@ -70,7 +70,7 @@ where
 pub fn hash_using_hash_hasher<T>(bencher: &mut Bencher)
 where
     T: Hash,
-    Standard: Distribution<T>,
+    StandardUniform: Distribution<T>,
 {
     perform_hash::<T, HashHasher>(bencher);
 }
@@ -78,7 +78,7 @@ where
 pub fn hash_using_fnv_hasher<T>(bencher: &mut Bencher)
 where
     T: Hash,
-    Standard: Distribution<T>,
+    StandardUniform: Distribution<T>,
 {
     perform_hash::<T, FnvHasher>(bencher);
 }
@@ -86,7 +86,7 @@ where
 pub fn set_using_default_hasher<T>(bencher: &mut Bencher)
 where
     T: Copy + Eq + Hash,
-    Standard: Distribution<T>,
+    StandardUniform: Distribution<T>,
 {
     let mut set = HashSet::<T>::with_capacity(COUNT);
     insert_to_set(&mut set, bencher);
@@ -95,7 +95,7 @@ where
 pub fn set_using_hash_hasher<T>(bencher: &mut Bencher)
 where
     T: Copy + Eq + Hash,
-    Standard: Distribution<T>,
+    StandardUniform: Distribution<T>,
 {
     let hash_builder = HashBuildHasher::default();
     let mut set = HashSet::<T, HashBuildHasher>::with_capacity_and_hasher(COUNT, hash_builder);
@@ -105,7 +105,7 @@ where
 pub fn set_using_fnv_hasher<T>(bencher: &mut Bencher)
 where
     T: Copy + Eq + Hash,
-    Standard: Distribution<T>,
+    StandardUniform: Distribution<T>,
 {
     let hash_builder = FnvBuildHasher::default();
     let mut set = HashSet::<T, FnvBuildHasher>::with_capacity_and_hasher(COUNT, hash_builder);

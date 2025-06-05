@@ -1,5 +1,5 @@
 use rand::{
-    distributions::{Distribution, Standard},
+    distr::{Distribution, StandardUniform},
     Rng,
 };
 use std::{
@@ -38,11 +38,11 @@ impl Hash for Digest {
     }
 }
 
-impl Distribution<Digest> for Standard {
+impl Distribution<Digest> for StandardUniform {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Digest {
         let mut digest = [0_u8; DIGEST_SIZE];
         for c in digest[..].iter_mut() {
-            *c = rng.gen();
+            *c = rng.random();
         }
         Digest(digest)
     }

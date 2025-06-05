@@ -1,15 +1,19 @@
 [package]
-authors = ["Fraser Hutchison <fraser.hutchison@maidsafe.net>"]
+authors = ["Fraser Hutchison <fraser@astria.org>"]
 categories = ["data-structures"]
 description = "A hasher which is designed to work with already-hashed or hash-like data."
+documentation = "https://docs.rs/hash_hasher"
 edition = "2018"
-keywords = ["hashmap", "hashset", "hasher", "hash", ]
+keywords = ["hashmap", "hashset", "hasher", "hash"]
 license = "Apache-2.0 OR MIT"
 name = "hash_hasher"
 readme = "README.md"
 repository = "https://github.com/Fraser999/Hash-Hasher.git"
-version = "2.0.3"
+version = "2.0.4"
+
+[badges.maintenance]
+status = "passively-maintained"
 
 [dev-dependencies]
-rand = "0.7"
-fnv = "1"
+rand = "0.9.1"
+fnv = "1.0.7"

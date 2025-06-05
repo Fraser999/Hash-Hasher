@@ -1,34 +1,3 @@
-#![warn(unused, missing_copy_implementations, missing_docs)]
-#![deny(
-    deprecated_in_future,
-    future_incompatible,
-    macro_use_extern_crate,
-    rust_2018_idioms,
-    nonstandard_style,
-    single_use_lifetimes,
-    trivial_casts,
-    trivial_numeric_casts,
-    unsafe_code,
-    unused_import_braces,
-    unused_lifetimes,
-    unused_qualifications,
-    unused_results,
-    warnings,
-    clippy::all,
-    clippy::pedantic
-)]
-#![forbid(
-    const_err,
-    invalid_type_param_default,
-    macro_expanded_macro_exports_accessed_by_absolute_paths,
-    missing_fragment_specifier,
-    mutable_transmutes,
-    no_mangle_const_items,
-    order_dependent_trait_objects,
-    overflowing_literals,
-    pub_use_of_private_extern_crate,
-    unknown_crate_types
-)]
 #![feature(test)]
 
 extern crate test;
